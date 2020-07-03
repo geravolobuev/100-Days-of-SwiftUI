@@ -14,10 +14,10 @@ struct FlagImage: View {
     
     var body: some View {
         Image(imageName)
-        .renderingMode(.original)
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(Color.black, lineWidth: 1))
-        .shadow(color: .black, radius: 2)
+            .renderingMode(.original)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(Color.black, lineWidth: 1))
+            .shadow(color: .black, radius: 2)
     }
 }
 
@@ -26,9 +26,10 @@ struct ContentView: View {
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
     
-    @State private var isShowing = false
-    @State private var scoreTitle = ""
     @State private var score = 0
+    @State private var animationAmount = 0.0
+    @State private var opacityAmount = 1.0
+    @State private var overlayLineWidth: CGFloat = 0.0
     
     var body: some View {
         ZStack {
@@ -52,9 +53,14 @@ struct ContentView: View {
                 ForEach(0 ..< 3) { number in
                     Button(action: {
                         self.flagTapped(number)
+                        
                     }) {
                         FlagImage(imageName: self.countries[number])
                     }
+                    .rotation3DEffect(.degrees(number == self.correctAnswer ? self.animationAmount : 0), axis: (x: 0, y: 1, z: 0))
+                    .opacity(number != self.correctAnswer ? self.opacityAmount : 1)
+                    .overlay(Capsule().stroke(number != self.correctAnswer ? Color.red : Color.green, lineWidth: self.overlayLineWidth))
+                    
                 }
                 
                 Text("Current score: \(score)")
@@ -64,26 +70,36 @@ struct ContentView: View {
                 Spacer()
             }
         }
-        .alert(isPresented: $isShowing) {
-            Alert(title: Text(self.scoreTitle), message: Text("Your score is: \(self.score)"), dismissButton: .default(Text("Ok")) {
-                self.askQuestion()
-                })
-        }
     }
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
-            self.scoreTitle = "Correct!"
+            withAnimation {
+                self.animationAmount += 360
+                self.opacityAmount = 0.25
+            }
             self.score += 1
+            
         } else {
-            self.scoreTitle = "Wrong! Thats the flag of \(self.countries[number])"
             self.score -= 1
+            withAnimation {
+                self.overlayLineWidth = 15
+            }
+
         }
-        isShowing = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.askQuestion()
+        }
+
     }
     
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0 ... 2)
+        withAnimation {
+            opacityAmount = 1
+            overlayLineWidth = 0
+        }
     }
 }
 
