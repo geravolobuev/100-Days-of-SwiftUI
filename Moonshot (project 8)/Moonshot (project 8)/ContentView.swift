@@ -41,6 +41,7 @@ struct ContentView: View {
             })
         .navigationBarTitle("Moonshot")
         }
+        
     }
     
     func getCrew(_ mission: Mission) -> String {

@@ -36,6 +36,7 @@ struct AstronautView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: geometry.size.width)
+                        
                     
                     Group {
                         Text(self.astronaut.description)
@@ -64,7 +65,8 @@ struct AstronautView: View {
                 }
             }
         }
-        .navigationBarTitle(Text(astronaut.name), displayMode: .inline)   
+        .navigationBarTitle(Text(astronaut.name), displayMode: .inline)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
